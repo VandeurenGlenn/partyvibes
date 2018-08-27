@@ -1,0 +1,68 @@
+{
+  "name": "partyvibes",
+  "version": "0.1.0",
+  "description": "",
+  "main": "app/main.js",
+  "scripts": {
+    "clean": "rm -rf app/node_modules && rm -rf app/workers && rm -rf dist",
+    "compile": "cp src/app/index.html app/index.html && rollup -c",
+    "start": "electron app",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "npm run compile && electron-builder --dir",
+    "dist": "npm run compile && electron-builder",
+    "release": "npm run compile && electron-builder"
+  },
+  "build": {
+    "productName": "PartyVibes",
+    "copyright": "Copyright © 2018 VandeurenGlenn <vandeurenglenn@gmail.com>",
+    "appId": "org.basicelements.partyvibes",
+    "directories": {
+      "app": "app"
+    },
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "asar": true,
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": {
+        "target": "AppImage",
+        "arch": [
+          "armv7l"
+        ]
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vandeurenglenn/partyvibes.git"
+  },
+  "keywords": [
+    "party",
+    "dj",
+    "music",
+    "player"
+  ],
+  "author": "Glenn Vandeuren <vandeurenglenn@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vandeurenglenn/partyvibes/issues"
+  },
+  "homepage": "https://github.com/vandeurenglenn/partyvibes#readme",
+  "dependencies": {
+    "backed": "^0.13.0",
+    "custom-drag-drop": "^0.2.5",
+    "custom-pages": "^0.12.0",
+    "custom-renderer-mixin": "^1.1.1",
+    "custom-select-mixins": "^0.11.3",
+    "custom-selector": "^0.1.0",
+    "electron": "^2.0.5",
+    "electron-builder": "^20.28.2",
+    "web-audio-beat-detector": "^6.0.68"
+  },
+  "devDependencies": {
+    "rollup": "^0.63.5"
+  }
+}
