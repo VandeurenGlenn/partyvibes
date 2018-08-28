@@ -74,7 +74,7 @@ define(class CustomSelect extends PropertyMixin(RenderMixin(HTMLElement)) {
   _onSelected({detail}) {
     this.selected = this.querySelector(`[data-id="${detail}"]`).innerHTML;
     this.selector.removeEventListener('selected', this._onSelected);
-
+    this.dispatchEvent(new CustomEvent('selected', {detail}))
     this.close();
   }
 
