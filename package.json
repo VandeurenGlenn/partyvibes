@@ -4,13 +4,14 @@
   "description": "",
   "main": "app/main.js",
   "scripts": {
-    "clean": "rm -rf app/node_modules && rm -rf app/workers && rm -rf dist",
-    "compile": "cp src/app/index.html app/index.html && rollup -c",
+    "clean": "rm -rf app/node_modules && rm -rf app/workers && rm -rf app/package.json && rm -rf dist",
+    "compile": "rollup -c",
+    "build": "cp src/app/index.html app/index.html && cp src/app/package.json app/package.json && npm run compile",
     "start": "electron app",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pack": "npm run compile && electron-builder --dir",
-    "dist": "npm run compile && electron-builder",
-    "release": "npm run compile && electron-builder"
+    "pack": "npm run build && electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "release": "npm run build && electron-builder"
   },
   "build": {
     "productName": "PartyVibes",
