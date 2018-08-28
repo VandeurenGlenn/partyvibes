@@ -1,2 +1,8 @@
 node_modules
 dist
+app/workers
+app/index.js
+app/index.html
+app/main.js
+app/package.json
+app/package-lock.json
