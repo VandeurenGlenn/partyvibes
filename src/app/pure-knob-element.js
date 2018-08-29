@@ -3,7 +3,7 @@ import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mix
 
 export default define(class PureKnobElement extends RenderMixin(HTMLElement) {
   get size() {
-    return 48;
+    return 40;
   }
 
   constructor() {
@@ -41,8 +41,8 @@ export default define(class PureKnobElement extends RenderMixin(HTMLElement) {
     display: flex;
     /* border: 1px solid #eee;
     border-radius: 50%; */
-    height: 48px;
-    width: 48px;
+    height: 40px;
+    width: 40px;
     pointer-events: auto;
     cursor: pointer;
   }

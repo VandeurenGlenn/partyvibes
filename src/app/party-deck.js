@@ -5,6 +5,7 @@ import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mix
 import './party-turntable.js';
 import './party-mixer.js';
 import './party-filters';
+import lines from './../utils/lines';
 import GainNode from './gain-node';
 
 
@@ -60,7 +61,6 @@ export default define(class PartyDeck extends RenderMixin(HTMLElement) {
 
   connectedCallback() {
     if (super.connectedCallback) super.connectedCallback();
-
     for (let deck = 0; deck < this.decks; deck++) {
       const table = document.createElement('party-turntable');
       table.setAttribute('name', this.__tables__[deck].name);
@@ -113,6 +113,7 @@ export default define(class PartyDeck extends RenderMixin(HTMLElement) {
   .row {
     display: flex;
     flex-direction: row;
+    height: 100%;
   }
   .flex {
     flex: 1;
@@ -124,6 +125,7 @@ export default define(class PartyDeck extends RenderMixin(HTMLElement) {
   </span>
   <span class="column">
     <party-filters></party-filters>
+    <span class="flex"></span>
     <party-mixer></party-mixer>
   </span>
   <span class="column">

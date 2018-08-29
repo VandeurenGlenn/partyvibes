@@ -2,7 +2,7 @@ import define from '../../node_modules/backed/src/utils/define';
 import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mixin';
 
 import './party-slider';
-
+import lines from './../utils/lines';
 export default define(class PartyMixer extends RenderMixin(HTMLElement) {
   constructor() {
     super();
@@ -13,7 +13,23 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
   connectedCallback() {
     if (super.connectedCallback) super.connectedCallback();
     const sliders = this.shadowRoot.querySelectorAll('party-slider');
-    sliders.forEach(slider => slider.addEventListener('input', this._change))
+    sliders.forEach(slider => slider.addEventListener('input', this._change));
+
+    this.render({lines: lines({count: [
+      {height: 2, width: 3},
+      {height: 4, width: 3},
+      {height: 6, width: 3},
+      {height: 8, width: 3},
+      {height: 10, width: 3},
+      {height: 12, width: 3},
+      {height: 14, width: 3},
+      {height: 12, width: 3},
+      {height: 10, width: 3},
+      {height: 8, width: 3},
+      {height: 6, width: 3},
+      {height: 4, width: 3},
+      {height: 2, width: 3}
+    ]})})
   }
 
   _change(event) {
@@ -35,20 +51,22 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
   :host {
     display: flex;
     flex-direction: column;
-    padding: 12px 24px 12px 24px;
     box-sizing: border-box;
     min-width: 180px;
+    height: 100%;
+
+    min-height: 256px;
     border-left: 1px solid #fff;
     border-right: 1px solid #fff;
   }
 
   .gains {
-    padding: 8px 0;
     width: 100%;
   }
 
-  .defeat {
-    padding: 8px 0;
+  .fade {
+    padding: 0 8px;
+
   }
 
   .row {
@@ -76,25 +94,42 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
   .center-center {
     justify-content: center;
   }
+
+  .lines.top {
+    align-items: flex-end;
+  }
+
+  .spacer {
+    display: block;
+    height: 1px;
+    background: #FFF;
+    width: 100%;
+  }
 </style>
+<span class="flex"></span>
 <span class="row gains">
   <span class="flex"></span>
+
+  <span class="column lines">${'lines'}</span>
   <party-slider vertical name="A"></party-slider>
+  <span class="column lines">${'lines'}</span>
   <span class="flex2"></span>
+
+  <span class="column lines">${'lines'}</span>
   <party-slider vertical name="B"></party-slider>
+  <span class="column lines">${'lines'}</span>
   <span class="flex"></span>
 </span>
 
 <span class="flex"></span>
-
-<span class="row">
-  <span class="flex"></span>
-  <h4>A</h4>
-  <span class="flex2"></span>
-  <h4>B</h4>
-  <span class="flex"></span>
+<span class="spacer"></span>
+<span class="flex"></span>
+<span class="fade column">
+  <span class="row lines top">${'lines'}</span>
+  <party-slider class="fader" name="fader"></party-slider>
+  <span class="row lines">${'lines'}</span>
 </span>
-<party-slider class="fader" name="fader"></party-slider>
+<span class="flex"></span>
     `;
   }
 })

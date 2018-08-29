@@ -44,6 +44,7 @@ export default define(class PartyFilters extends RenderMixin(HTMLElement) {
     padding: 12px 12px 12px 12px;
     box-sizing: border-box;
     width: 100%;
+    height: 100%;
     border: 1px solid #fff;
     align-items: center;
     background: #888;
