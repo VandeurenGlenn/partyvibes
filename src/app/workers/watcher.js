@@ -1,6 +1,6 @@
 import { watch } from 'chokidar';
 let watcher;
-const isMusic = path => { if (path.includes('.mp3')) return true };
+const isMusic = path => { if (path.includes('.mp3') || path.includes('.wav')) return true };
 
 const newWatcher = paths => {
   watcher = watch(paths);
