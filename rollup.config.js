@@ -71,5 +71,14 @@ export default [
   		experimentalCodeSplitting: true,
   		experimentalDynamicImport: true
 		}
+	}, {
+		input: 'src/utils/worker.js',
+		output: {
+			file: 'app/utils/worker.js',
+			format: 'cjs',
+			sourcemap: false,
+  		experimentalCodeSplitting: true,
+  		experimentalDynamicImport: true
+		}
 	}
 ];

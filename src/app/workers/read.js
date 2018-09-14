@@ -1,6 +1,6 @@
 'use strict';
 import {join} from 'path';
-import { bufferToArrayBuffer, read } from '../../utils/index.js';
+import { bufferToArrayBuffer, read } from '../../utils/worker.js';
 
 onmessage = async message => {
   try {

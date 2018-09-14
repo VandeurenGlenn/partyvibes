@@ -1,9 +1,8 @@
 'use strict';
-import {join} from 'path';
-import { bufferToArrayBuffer, write } from '../../utils/index.js';
+import { join } from 'path';
+import { bufferToArrayBuffer, write } from '../../utils/worker.js';
 
 onmessage = async ({data}) => {
-  console.log(join(__dirname, data.path));
   try {
     await write(join(__dirname, data.path), data.data);
     postMessage('succes');

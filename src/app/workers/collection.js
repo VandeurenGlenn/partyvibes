@@ -1,6 +1,6 @@
 import { parse, parseV2Tag } from 'id3-parser';
 import { join } from 'path'
-import { bufferToArrayBuffer, readOrCreate, read, write } from '../../utils/index.js';
+import { bufferToArrayBuffer, readOrCreate, read, write } from '../../utils/worker.js';
 
 
 // TODO: add option to optimize collection (when id3's are changed manual or something ...)
@@ -27,11 +27,11 @@ onmessage = async ({data}) => {
     postMessage(data)
   } else { // handle as new file
     const buffer = await read(data);
-    const { bpm, artist, title, year, image, track, setpart, genre } = parse(buffer);
+    const { bpm, artist, title, year, track, setpart, genre } = parse(buffer);
     const arrayBuffer = bufferToArrayBuffer(buffer);
 
 
-    const song = updateCollection(data, { bpm, artist, title, year, image, track, 'set-part': setpart, genre });;
+    const song = updateCollection(data, { bpm, artist, title, year, track, 'set-part': setpart, genre });;
 
     await writeCollection();
 

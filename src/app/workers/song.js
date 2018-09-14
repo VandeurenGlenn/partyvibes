@@ -1,5 +1,5 @@
 'use strict';
-import { bufferToArrayBuffer, read } from '../../utils/index.js';
+import { bufferToArrayBuffer, read } from '../../utils/worker.js';
 
 onmessage = async message => {
   const buffer = await read(message.data);

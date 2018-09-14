@@ -4,6 +4,7 @@ import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mix
 
 import './party-slider';
 import './party-button';
+import './../custom-select';
 import lines from './../utils/lines'
 
 export default define(class PartyTempoSlider extends RenderMixin(HTMLElement) {

@@ -20,8 +20,30 @@
     <party-vibes></party-vibes>
     <script src="third-party/pure-knob/pureknob.js"></script>
     <script>
-      window.anime = require('animejs')
-      require('./index.js');
+
+      window.party = window.party || {
+        audioContext: new AudioContext(),
+        loaded: [],
+        config: {
+          // customConfig
+        }
+      };
+
+      window.anime = require('animejs');
+      const { read, write } = require('./utils/worker.js');
+      (async () => {
+        try {
+          const config = await read('./config.json');
+          window.party.config = JSON.parse(config.toString())
+        } catch (e) {
+          window.party.config = {
+            paths: []
+          };
+          await write('./config.json', JSON.stringify(window.party.config));
+          // return console.log('no config');
+        }
+        require('./index.js');
+      })()
       window.peaks = require('peaks.js');
     </script>
   </body>
