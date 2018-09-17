@@ -45,6 +45,7 @@ export const template = html`
       flex: 1;
     }
   </style>
+  <custom-title-bar></custom-title-bar>
 
   <span class="setting">
     <h4 class="devices">Audio devices</h4>
@@ -52,11 +53,11 @@ export const template = html`
     <custom-select label="main" selected="Default">main</custom-select>
 
     <custom-select label="monitor" selected="Default">monitor</custom-select>
+  </span>
+
+  <span class="setting">
     <h4 class="libraries">libraries</h4>
     <h6>folders to scan for files</h6>
-
-
-
     <party-button class="add">add</party-button>
   </span>
 `;

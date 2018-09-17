@@ -2,37 +2,42 @@ import define from '../../../node_modules/backed/src/utils/define';
 import RenderMixin from '../../../node_modules/custom-renderer-mixin/src/render-mixin.js';
 import { analyze } from '../../../node_modules/web-audio-beat-detector/build/es2015/module.js';
 
+import { read, write } from '../../utils/app.js';
 import './collection-item.js';
 import './collection-explorer';
+import '../party-playlist.js';
 
 export default define(class PartyCollection extends RenderMixin(HTMLElement) {
   constructor() {
     super();
     this.attachShadow({mode: 'open'})
+    this.que = [];
+    this.audioContext = new AudioContext();
   }
 
   connectedCallback() {
     (async () => {
       if (super.connectedCallback) super.connectedCallback();
 
+      // try {
+      //   this.config = await read('../../config.json');
+      //   window.party.config = this.config;
+      // } catch (e) {
+      //   this.config = {
+      //     paths: []
+      //   };
+      //   await write('../../config.json', JSON.stringify(this.config));
+      //   // return console.log('no config');
+      // }
+      this.config = window.party.config
+      console.log(this.config);
       try {
-        this.config = await this.read('../../config.json');
-      } catch (e) {
-        this.config = {
-          paths: []
-        };
-        await this.write('../../config.json', JSON.stringify(this.config));
-        // return console.log('no config');
-      }
-
-      window.party.config = this.config;
-      try {
-        this.collection = await this.read('../../collection');
+        this.collection = await read('../../collection');
         this.stampCollection()
       } catch (e) {
         console.log(e);
         this.collection = {};
-        await this.write('../../collection', JSON.stringify(this.collection));
+        await write('../../collection', JSON.stringify(this.collection));
       }
       this.watcher = new Worker('workers/watcher.js');
       this.watcher.onmessage = message => {
@@ -45,36 +50,36 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
     this.updateSongQues = this.updateSongQues.bind(this)
     document.addEventListener('save-ques', this.updateSongQues)
   }
-
-  /**
-   * reads json
-   */
-  read(path) {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker('workers/read.js');
-
-      worker.onmessage = ({ data }) => {
-        if (data.error) return reject(data.error);
-        data = utils.arrayBufferToJSON(data);
-        resolve(data);
-      }
-
-      worker.postMessage(path);
-    });
-  }
-
-  write(path, data) {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker('workers/write.js');
-
-      worker.onmessage = ({ data }) => {
-        if (data.error) return reject(data.error);
-        resolve();
-      }
-
-      worker.postMessage({ path, data });
-    });
-  }
+  //
+  // /**
+  //  * reads json
+  //  */
+  // read(path) {
+  //   return new Promise((resolve, reject) => {
+  //     const worker = new Worker('workers/read.js');
+  //
+  //     worker.onmessage = ({ data }) => {
+  //       if (data.error) return reject(data.error);
+  //       data = utils.arrayBufferToJSON(data);
+  //       resolve(data);
+  //     }
+  //
+  //     worker.postMessage(path);
+  //   });
+  // }
+  //
+  // write(path, data) {
+  //   return new Promise((resolve, reject) => {
+  //     const worker = new Worker('workers/write.js');
+  //
+  //     worker.onmessage = ({ data }) => {
+  //       if (data.error) return reject(data.error);
+  //       resolve();
+  //     }
+  //
+  //     worker.postMessage({ path, data });
+  //   });
+  // }
 
   needsUpdate(path) {
     return !this.collection[path];
@@ -123,22 +128,49 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
     // const {path, }
   }
 
-  prepare(path) {
-    this.collectionWorker = new Worker('workers/collection.js');
-    // TODO: ignore path in chokidar
-    this.collectionWorker.onmessage = async message => {
-      if (message.data.status === 'updated') return this.updateCollection(message.data.song);
-      // if (!message.arrayBuffer && !message.song message.data !== 'succes') return console.error(message);
-      if (!message.data.song.bpm) {
-        const audioBuffer = await this.decode(message.data.arrayBuffer);
-        message.data.song.bpm = await analyze(audioBuffer);
-        this.collectionWorker.postMessage(message.data.song)
-        return;
-      }
-      this.updateCollection(message.data.song);
-    }
+  runQue(que) {
+    const last = que[que.length - 1];
+    if (!this.queRunning && last) {
+      this.queRunning = true;
+      this.collectionWorker = new Worker('workers/collection.js');
+      // TODO: ignore path in chokidar
+      this.collectionWorker.onmessage = async message => {
+        console.log(que);
+        this.queRunning = false;
+        // if (message.data.status === 'updated') this.updateCollection(message.data.song);
+        // else {
+        try {
+          if (!message.data.song.bpm) {
+            const audioBuffer = await this.decode(message.data.arrayBuffer);
+            const bpm = await analyze(audioBuffer);
+            message.data.song.bpm = Math.round(bpm);
+            this.collectionWorker.postMessage(message.data.song)
+            return;
+          } else {
+            message.data.song.bpm = Math.round((bpm * 100)) / 100;
+          }
+        } catch (e) {
+          message.data.song.bpm = 0;
+        }
+          this.updateCollection(message.data.song);
+        // }
+          const index = que.indexOf(last);
+          que.splice(index, 1)
+          console.log(que);
+        if (this.que.length === 0) console.log('write');
 
-    this.collectionWorker.postMessage(path)
+        this.runQue(que);
+        // if (!message.arrayBuffer && !message.song message.data !== 'succes') return console.error(message);
+
+      }
+
+      this.collectionWorker.postMessage(last)
+    }
+  }
+
+  prepare(path) {
+    this.que.push(path);
+    this.runQue(this.que)
   }
 
   get template() {
@@ -151,12 +183,34 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
           bottom: 0;
           right: 0;
           left: 0;
-          height: 45%;
+          height: 50%;
 
           border: 1px solid #FFF;
           background: #555;
+
+          --party-playlist-width: 320px;
+          --party-playlist-studio-width: 50%;
+        }
+
+        :host([mode="studio"]) {
+          top: 0;
+          bottom: none;
+        }
+
+        :host([mode="studio"]) party-playlist {
+          position: absolute;
+          right: 0;
+          width: calc(100% - var(--party-playlist-studio-width));
+        }
+
+        :host([mode="studio"]) collection-explorer {
+          position: absolute;
+          left: 0;
+          width: calc(100% - var(--party-playlist-studio-width));
         }
       </style>
+
+      <party-playlist></party-playlist>
 
       <collection-explorer>
         <slot></slot>

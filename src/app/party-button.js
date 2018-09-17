@@ -19,10 +19,12 @@ export default define(class PartyButton extends RenderMixin(HTMLElement) {
 
     pointer-events: auto;
     cursor: pointer;
+    box-sizing: border-box;
   }
 
   button {
-    min-height: 48px;
+    height: inherit;
+    min-height: 38px;
     min-width: 56px;
     width: inherit;
     pointer-events: none;

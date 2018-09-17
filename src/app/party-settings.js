@@ -1,9 +1,9 @@
-import define from '../../../node_modules/backed/src/utils/define';
-import RenderMixin from '../../../node_modules/custom-renderer-mixin/src/render-mixin.js';
+import define from '../../node_modules/backed/src/utils/define';
+import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mixin.js';
 
-import '../../custom-select.js';
+import '../custom-select.js';
 
-export default define(class CollectionSettings extends RenderMixin(HTMLElement) {
+export default define(class PartySettings extends RenderMixin(HTMLElement) {
 
   constructor() {
     super();
@@ -13,7 +13,7 @@ export default define(class CollectionSettings extends RenderMixin(HTMLElement) 
   }
 
   connectedCallback() {
-    import(`./collection-settings-template.js`).then(async ({ template }) => {
+    import(`./party-settings-template.js`).then(async ({ template }) => {
       this.template = template;
       if (super.connectedCallback) super.connectedCallback()
 
@@ -27,6 +27,8 @@ export default define(class CollectionSettings extends RenderMixin(HTMLElement) 
 
       this.shadowRoot.querySelector('.add').addEventListener('click', this._addFolder);
       // console.log('Audio is being played on ' + audio.sinkId);
+
+      console.log(window.party.config);
     });
   }
 

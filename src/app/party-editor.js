@@ -118,7 +118,7 @@ export default define(class PartyDeck extends RenderMixin(HTMLElement) {
     flex: 1;
   }
 
-  :host([mode="studio"]) {
+  :host([mode="meister"]) {
     opacity: 0;
     pointer-events: none;
   }

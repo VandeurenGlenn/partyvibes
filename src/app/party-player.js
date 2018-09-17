@@ -118,7 +118,17 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
         }
         this.audio.setAttribute('src', message.data.uri);
 
+        let parentNode = this.parentNode;
+        while (!parentNode.host) {
+          parentNode = parentNode.parentNode
+        }
 
+        const detail = {
+          path: src,
+          deck: parentNode.host.getAttribute('name')
+        }
+
+        document.dispatchEvent(new CustomEvent('deck-load', { detail }))
 
       } catch (e) {
         console.error(e);

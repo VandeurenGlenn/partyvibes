@@ -15,21 +15,41 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
     const sliders = this.shadowRoot.querySelectorAll('party-slider');
     sliders.forEach(slider => slider.addEventListener('input', this._change));
 
-    this.render({lines: lines({count: [
-      {height: 2, width: 3},
-      {height: 4, width: 3},
-      {height: 6, width: 3},
-      {height: 8, width: 3},
-      {height: 10, width: 3},
-      {height: 12, width: 3},
-      {height: 14, width: 3},
-      {height: 12, width: 3},
-      {height: 10, width: 3},
-      {height: 8, width: 3},
-      {height: 6, width: 3},
-      {height: 4, width: 3},
-      {height: 2, width: 3}
-    ]})})
+    this.render({
+      lines: lines({
+        count: [
+          {height: 2, width: 3},
+          {height: 4, width: 3},
+          {height: 6, width: 3},
+          {height: 8, width: 3},
+          {height: 10, width: 3},
+          {height: 12, width: 3},
+          {height: 14, width: 3},
+          {height: 12, width: 3},
+          {height: 10, width: 3},
+          {height: 8, width: 3},
+          {height: 6, width: 3},
+          {height: 4, width: 3},
+          {height: 2, width: 3}
+        ]}),
+      verticalLines: lines({
+        count: [
+          {width: 2, height: 3},
+          {width: 4, height: 3},
+          {width: 6, height: 3},
+          {width: 8, height: 3},
+          {width: 10, height: 3},
+          {width: 12, height: 3},
+          {width: 14, height: 3},
+          {width: 12, height: 3},
+          {width: 10, height: 3},
+          {width: 8, height: 3},
+          {width: 6, height: 3},
+          {width: 4, height: 3},
+          {width: 2, height: 3}
+        ]
+      })
+    })
   }
 
   _change(event) {
@@ -55,7 +75,7 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
     min-width: 180px;
     height: 100%;
 
-    min-height: 256px;
+    /* min-height: 256px; */
     border-left: 1px solid #fff;
     border-right: 1px solid #fff;
   }
@@ -95,7 +115,7 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
     justify-content: center;
   }
 
-  .lines.top {
+  .lines.top, .lines.left {
     align-items: flex-end;
   }
 
@@ -105,19 +125,23 @@ export default define(class PartyMixer extends RenderMixin(HTMLElement) {
     background: #FFF;
     width: 100%;
   }
+
+  party-slider[vertical] {
+    height: 76px;
+  }
 </style>
 <span class="flex"></span>
 <span class="row gains">
   <span class="flex"></span>
 
-  <span class="column lines">${'lines'}</span>
+  <span class="column lines left">${'verticalLines'}</span>
   <party-slider vertical name="A"></party-slider>
-  <span class="column lines">${'lines'}</span>
+  <span class="column lines">${'verticalLines'}</span>
   <span class="flex2"></span>
 
-  <span class="column lines">${'lines'}</span>
+  <span class="column lines left">${'verticalLines'}</span>
   <party-slider vertical name="B"></party-slider>
-  <span class="column lines">${'lines'}</span>
+  <span class="column lines">${'verticalLines'}</span>
   <span class="flex"></span>
 </span>
 
