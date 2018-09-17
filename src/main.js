@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 
 app.on('ready', () => {
-  const mainWindow = new BrowserWindow({width: 1440, height: 900, webPreferences: { nodeIntegrationInWorker: true }});
+  const mainWindow = new BrowserWindow({width: 1440, height: 900, frame: false, webPreferences: { nodeIntegrationInWorker: true }});
   // mainWindow.webContents.openDevTools()
 
   const hasInstance = (() => {
