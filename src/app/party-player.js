@@ -6,7 +6,7 @@ import './scrolling-text.js';
 export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
 
   get ques() {
-    return this.peaks.points.getPoints()
+    return this.peaks.points ? this.peaks.points.getPoints() : null
   }
 
   get queLabels() {
@@ -61,7 +61,7 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
     data = JSON.parse(data);
     this.beforeLoad(data);
     this.data = data;
-    this.load(this.data.path, this.data.ques);
+    this.load(this.data.path, this.data.ques || []);
     this.text = `${this.data.artist} - ${this.data.title}`;
   }
 
@@ -170,11 +170,13 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
   }
 
   saveQues() {
-    document.dispatchEvent(new CustomEvent('save-ques', {detail: {
-        path: this.data.path,
-        ques: this.ques
-      }
-    }))
+    if (this.ques) {
+      document.dispatchEvent(new CustomEvent('save-ques', {detail: {
+          path: this.data.path,
+          ques: this.ques
+        }
+      }))
+    }
   }
 
   // TODO: reduce writing to disk

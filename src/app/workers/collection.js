@@ -20,6 +20,7 @@ onmessage = async ({data}) => {
     delete data.path;
     updateCollection(path, data);
     await writeCollection();
+    data.path = path;
     data = {
       status: 'updated',
       song: data

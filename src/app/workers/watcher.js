@@ -10,12 +10,12 @@ const newWatcher = paths => {
 
 onmessage = async message => {
   if (message.data.add)
-    if (watcher === undefined) newWatcher(message.data.paths);
-    else watcher.add(message.data.paths);
+    if (watcher === undefined) newWatcher(message.data.paths, {ignored: message.data.ignore});
+    else watcher.add(message.data.add);
 
   else {
     try {
-      if (watcher === undefined) newWatcher(message.data);
+      if (watcher === undefined) newWatcher(message.data.paths, {ignored: message.data.ignore});
     } catch (error) {
       postMessage({error})
     }

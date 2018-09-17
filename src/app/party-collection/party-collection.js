@@ -30,56 +30,24 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
       //   // return console.log('no config');
       // }
       this.config = window.party.config
-      console.log(this.config);
       try {
         this.collection = await read('../../collection');
         this.stampCollection()
       } catch (e) {
-        console.log(e);
         this.collection = {};
         await write('../../collection', JSON.stringify(this.collection));
       }
       this.watcher = new Worker('workers/watcher.js');
       this.watcher.onmessage = message => {
-        if (this.needsUpdate(message.data)) this.prepare(message.data)
-        console.log(message.data + ' added');
+        if (this.needsUpdate(message.data)) this.prepare(message.data);
       }
-      this.watcher.postMessage(this.config.paths);
+      const ignore = Object.keys(this.collection).map(i => {return i});
       window.watcher = this.watcher
+      this.watcher.postMessage({paths: this.config.paths, ignore: ignore});
     })();
     this.updateSongQues = this.updateSongQues.bind(this)
     document.addEventListener('save-ques', this.updateSongQues)
   }
-  //
-  // /**
-  //  * reads json
-  //  */
-  // read(path) {
-  //   return new Promise((resolve, reject) => {
-  //     const worker = new Worker('workers/read.js');
-  //
-  //     worker.onmessage = ({ data }) => {
-  //       if (data.error) return reject(data.error);
-  //       data = utils.arrayBufferToJSON(data);
-  //       resolve(data);
-  //     }
-  //
-  //     worker.postMessage(path);
-  //   });
-  // }
-  //
-  // write(path, data) {
-  //   return new Promise((resolve, reject) => {
-  //     const worker = new Worker('workers/write.js');
-  //
-  //     worker.onmessage = ({ data }) => {
-  //       if (data.error) return reject(data.error);
-  //       resolve();
-  //     }
-  //
-  //     worker.postMessage({ path, data });
-  //   });
-  // }
 
   needsUpdate(path) {
     return !this.collection[path];
@@ -104,10 +72,10 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
   }
 
   stampCollection() {
-    Object.keys(this.collection).forEach(key => {
-      this.collection[key].path = key;
-      this.updateCollection(this.collection[key])
-    })
+    for (const path of Object.keys(this.collection)) {
+      this.collection[path].path = path;
+      this.updateCollection(this.collection[path])
+    }
   }
 
   updateCollection(song) {
@@ -121,7 +89,6 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
     this.collection[path].ques = ques;
     this.collectionWorker = this.collectionWorker || new Worker('workers/collection.js');
     this.collectionWorker.postMessage(this.collection[path])
-
   }
 
   updateSong({detail}) {
@@ -135,10 +102,7 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
       this.collectionWorker = new Worker('workers/collection.js');
       // TODO: ignore path in chokidar
       this.collectionWorker.onmessage = async message => {
-        console.log(que);
         this.queRunning = false;
-        // if (message.data.status === 'updated') this.updateCollection(message.data.song);
-        // else {
         try {
           if (!message.data.song.bpm) {
             const audioBuffer = await this.decode(message.data.arrayBuffer);
@@ -147,7 +111,7 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
             this.collectionWorker.postMessage(message.data.song)
             return;
           } else {
-            message.data.song.bpm = Math.round((bpm * 100)) / 100;
+            message.data.song.bpm = Math.round((message.data.song.bpm * 100)) / 100;
           }
         } catch (e) {
           message.data.song.bpm = 0;
@@ -155,8 +119,7 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
           this.updateCollection(message.data.song);
         // }
           const index = que.indexOf(last);
-          que.splice(index, 1)
-          console.log(que);
+          que.splice(index, 1);
         if (this.que.length === 0) console.log('write');
 
         this.runQue(que);
