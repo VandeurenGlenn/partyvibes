@@ -43,11 +43,10 @@ export default define(class CollectionItem extends RenderMixin(HTMLElement) {
 
   dragstart(event) {
     this.dragging = true;
-    event.dataTransfer.setData('items', JSON.stringify(this.data));
+    event.dataTransfer.setData('items', JSON.stringify(window.party.collection[this.data.path]));
   }
 
   mouseup(event) {
-    event.dataTransfer.setData('application/json', this.data);
     this.dragging = false;
     document.removeEventListener('mouseup', this.mouseup);
   }
