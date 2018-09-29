@@ -18,6 +18,22 @@ export const template = html`
     ::slotted(.flex) {
       flex: 1;
     }
+
+    ::slotted(.flex2) {
+      flex: 2;
+    }
+
+    ::slotted(h4) {
+      min-width: 120px;
+      max-width: 240px;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    ::slotted(.last) {
+      min-width: 26px;
+      width: 26px;
+    }
   </style>
   <slot></slot>
 `;

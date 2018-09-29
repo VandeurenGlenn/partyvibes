@@ -85,13 +85,13 @@ export default define(class PartyTurntable extends RenderMixin(HTMLElement) {
     return html`
     <style>
     :host {
+      display: flex;
+      flex-direction: column !important;
       height: 100%;
       width: 100%;
-      display: flex;
-      flex-direction: row;
       pointer-events: auto;
       background: #555;
-      padding: 24px 0 24px 0;
+      padding: 12px;
       box-sizing: border-box;
     }
 
@@ -122,11 +122,6 @@ export default define(class PartyTurntable extends RenderMixin(HTMLElement) {
       flex: 2;
     }
 
-    party-tempo-slider, .side {
-
-      padding: 0 24px;
-    }
-
     .que-item {
       display: flex;
       align-items: center;
@@ -138,43 +133,46 @@ export default define(class PartyTurntable extends RenderMixin(HTMLElement) {
       align-items: center;
     }
 
+    party-tempo-slider {
+      padding-left: 12px;
+    }
 
-    party-button {
+    .reloop {
+      width: 67px;
+    }
+
+    .sized {
+      padding-left: 12px;
     }
     </style>
-    <span class="column side center">
 
+    <span class="row">
+      <span class="flex"></span>
+      <span class="column top">
+        <span class="row top">
+          <span class="column top">
+            <party-player></party-player>
+            <party-effects></party-effects>
+            <party-ques></party-ques>
+          </span>
+        </span>
+        <span class="flex"></span>
+      </span>
+      <span class="flex"></span>
+      <party-tempo-slider></party-tempo-slider>
+    </span>
+
+    <span class="flex"></span>
+
+    <span class="row center">
+      <party-button class="play">play</party-button>
+      <party-button class="que">que</party-button>
       <span class="flex2"></span>
       <party-button class="loop-in">in</party-button>
       <party-button class="loop-out">out</party-button>
+      <span class="sized"></span>
       <party-button class="reloop">reloop</party-button>
-
-      <span class="flex"></span>
-      <party-button class="que">que</party-button>
-      <party-button class="play">play</party-button>
     </span>
-
-    <span class="flex"></span>
-
-    <span class="column top">
-      <span class="row top">
-        <span class="column top">
-          <party-player></party-player>
-          <party-effects></party-effects>
-          <party-ques></party-ques>
-        </span>
-      </span>
-      <span class="row">
-
-
-        <span class="flex"></span>
-
-        <span class="flex2"></span>
-      </span>
-    </span>
-    <span class="flex"></span>
-    <party-tempo-slider></party-tempo-slider>
-
     `
 
   }

@@ -109,6 +109,10 @@ export default define(class PartyTempoSlider extends RenderMixin(HTMLElement) {
     align-items: flex-end;
   }
 
+  party-button {
+    width: 67px;
+  }
+
 </style>
 <span class="flex2"></span>
 <span class="row">

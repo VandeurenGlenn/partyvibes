@@ -15,23 +15,8 @@ export const template = html`
       flex-direction: column;
     }
 
-    .tabs {
-      display: flex;
-      flex-direction: row;
-      width: 100%;
-      height: 40px;
-
-      background: #777;
-
-      border-right: 1px solid #fff;
-    }
-
     custom-pages, .main {
       height: 100%;
-      width: 100%;
-    }
-
-    party-button {
       width: 100%;
     }
 
@@ -59,23 +44,17 @@ export const template = html`
 
     section {
       box-sizing: border-box;
-      padding: 4px 10px;
+      /* padding: 4px 10px; */
       overflow-y: auto;
     }
   </style>
 
 
 
-  <span class="column main">
 
-    <custom-selector class="tabs" selected="music" attr-for-selected="data-route">
-      <party-button data-route="music">Music</party-button>
-      <party-button data-route="effects">Effects</party-button>
-      <span class="flex"></span>
-    </custom-selector>
 
     <custom-pages selected="music" attr-for-selected="data-route">
       <section data-route="music"><slot></slot></section>
     </custom-pages>
-  </span>
+
 `;

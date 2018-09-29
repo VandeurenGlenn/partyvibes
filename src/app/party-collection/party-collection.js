@@ -16,11 +16,21 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
     return window.party.collection;
   }
 
+  get selector() {
+    return this.shadowRoot.querySelector('custom-selector');
+  }
+
+  get explorer() {
+    return this.shadowRoot.querySelector('collection-explorer');
+  }
+
   constructor() {
     super();
     this.attachShadow({mode: 'open'})
     this.que = [];
     this.audioContext = new AudioContext();
+
+    this._onSelected = this._onSelected.bind(this);
   }
 
   connectedCallback() {
@@ -37,7 +47,12 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
       this.watcher.postMessage({paths: this.config.paths, ignore: ignore});
     })();
     this.updateSongQues = this.updateSongQues.bind(this)
+    this.selector.addEventListener('selected', this._onSelected);
     document.addEventListener('save-ques', this.updateSongQues)
+  }
+
+  _onSelected({detail}) {
+    this.explorer.select(detail);
   }
 
   needsUpdate(path) {
@@ -144,6 +159,29 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
 
           --party-playlist-width: 320px;
           --party-playlist-studio-width: 50%;
+          overflow: hidden;
+        }
+
+        .row {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .column {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .tabs {
+          position: absolute;
+          left: 0;
+          width: var(--party-playlist-width);
+          height: 40px;
+
+          background: #777;
+
+          border-right: 1px solid #fff;
+          border-left: 1px solid #fff;
         }
 
         :host([mode="studio"]) {
@@ -151,10 +189,15 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
           bottom: none;
         }
 
-        :host([mode="studio"]) party-playlist {
+        :host([mode="studio"]) party-playlist, :host([mode="studio"]) .tabs {
           position: absolute;
           right: 0;
           width: calc(100% - var(--party-playlist-studio-width));
+        }
+
+        :host([mode="studio"]) party-playlist {
+          top: 40px;
+          height: calc(100% - 40px);
         }
 
         :host([mode="studio"]) collection-explorer {
@@ -162,12 +205,79 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
           left: 0;
           width: calc(100% - var(--party-playlist-studio-width));
         }
+
+        .list {
+          overflow: auto;
+          height: calc(100% - 40px);
+          box-sizing:border-box;
+          padding: 0 24px 8px 14px;
+        }
+
+        h4 {
+          margin: 0;
+          padding: 0;
+          min-width: 120px;
+          max-width: 240px;
+          overflow: hidden;
+          width: 100%;
+        }
+
+        .last {
+          min-width: 32px;
+          width: 32px;
+        }
+
+        .info {
+          align-items: flex-end;
+          background: #777;
+
+          height: 40px;
+
+          background: #777;
+          border-bottom: 1px solid #fff;
+          box-sizing: border-box;
+          padding: 0 38px 8px 14px;
+
+          /* border-right: 1px solid #fff;
+          border-left: 1px solid #fff; */
+
+        }
+
+        .flex {
+          flex: 1;
+        }
+        .flex2 {
+          flex: 2;
+        }
+
+        party-button {
+          width: 100%;
+        }
       </style>
 
-      <party-playlist></party-playlist>
+
+      <span class="column">
+        <custom-selector class="tabs row" selected="music" attr-for-selected="data-route">
+          <party-button data-route="music">Music</party-button>
+          <party-button data-route="effects">Effects</party-button>
+          <span class="flex"></span>
+        </custom-selector>
+        <party-playlist></party-playlist>
+      </span>
 
       <collection-explorer>
-        <slot></slot>
+        <span class="row info">
+          <h4>artist</h4>
+          <span class="flex"></span>
+          <h4>title</h4>
+          <span class="flex2"></span>
+          <h4>genre</h4>
+          <span class="flex2"></span>
+          <h4 class="last">bpm</h4>
+        </span>
+        <span class="list">
+          <slot></slot>
+        </span>
       </collection-explorer>
     `;
   }

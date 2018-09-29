@@ -9,10 +9,10 @@ export default define(class CollectionItem extends RenderMixin(HTMLElement) {
       <h4>${value.artist}</h4>
       <span class="flex"></span>
       <h4>${value.title}</h4>
-      <span class="flex"></span>
+      <span class="flex2"></span>
       <h4>${value.genre}</h4>
-      <span class="flex"></span>
-      <h4>${value.bpm}</h4>
+      <span class="flex2"></span>
+      <h4 class="last">${value.bpm}</h4>
     `;
   }
   constructor() {
