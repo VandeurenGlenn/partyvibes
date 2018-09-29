@@ -6,5 +6,6 @@ app/index.html
 app/main.js
 app/package.json
 app/package-lock.json
-collection
-config.json
+app/collection.json
+app/config.json
+app/utils
