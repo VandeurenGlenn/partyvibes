@@ -2,24 +2,27 @@ import define from '../../node_modules/backed/src/utils/define';
 import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mixin';
 
 import './scrolling-text.js';
+import {saveWaveform} from '../utils/app.js';
+import './peaks-element.js';
 
 export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
 
+  get peaksEl() {
+    return this.shadowRoot.querySelector('peaks-element');
+  }
+
   get ques() {
-    return this.peaks.points ? this.peaks.points.getPoints() : null
+    return this.peaksEl.peaks.points ? this.peaksEl.peaks.points.getPoints() : null
   }
 
   get queLabels() {
-    return ['A', 'B', 'C', 'D'];
+    return window.party.config.queLabels || ['A', 'B', 'C', 'D'];
   }
 
   get queColors() {
-    return ['#E91E63', '#673AB7', '#2196F3', '#00BCD4'];
+    return window.party.config.queColors || ['#E91E63', '#673AB7', '#2196F3', '#00BCD4'];
   }
 
-  get audio() {
-    return this.shadowRoot.querySelector('audio');
-  }
 
   set text(value) {
     this.shadowRoot.querySelector('scrolling-text').text = value;
@@ -34,8 +37,8 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
     super();
     this.attachShadow({mode: 'open'})
     this._onDrop = this._onDrop.bind(this);
-    this._userseek = this._userseek.bind(this);
     this._preventDefault = this._preventDefault.bind(this);
+    this._peaksElReady = this._peaksElReady.bind(this);
   }
 
   connectedCallback() {
@@ -46,9 +49,12 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
     this.addEventListener('dragover', this._preventDefault);
     this.addEventListener('drop', this._onDrop);
 
-    this.audioContext = new AudioContext()
+    this.peaksEl.addEventListener('user_seek', this._userseek);
+    this.peaksEl.addEventListener('ready', this._peaksElReady);
+
+    this.audioContext = window.party.audioContext;
     this.gainNode = this.audioContext.createGain()
-    this.audio.volume = 0;
+    this.peaksEl.audio.volume = 0;
   }
 
   _preventDefault(event) {
@@ -56,13 +62,12 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
   }
 
   _onDrop(event) {
-    event.preventDefault()
-    let data = event.dataTransfer.getData('items');
-    data = JSON.parse(data);
+    event.preventDefault();
+    const data = JSON.parse(event.dataTransfer.getData('items'));
     this.beforeLoad(data);
     this.data = data;
-    this.load(this.data.path, this.data.ques || []);
-    this.text = `${this.data.artist} - ${this.data.title}`;
+    this.load(this.data.path, this.data.dataUri, this.data.ques || []);
+    this.text = this.data.title ? `${this.data.artist} - ${this.data.title}` : this.data.path;
   }
 
   decode(ayyayBuffer) {
@@ -72,23 +77,20 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
     });
   }
 
-  load(src, ques = []) {
-    if (!src) return console.warn('src undefined');
+  load(uri, dataUri, ques) {
+    if (!uri) return console.warn('src undefined');
     this.worker = new Worker('workers/song.js');
     this.worker.onmessage = async message => {
       try {
-        if (this.peaks) this.peaks.destroy()
-        this.audio.onloadeddata = async () => {
-          const buffer_size = 4096;
-          this.peaks = peaks.init({
-            container: this.shadowRoot.querySelector('.peaks-container'),
-            mediaElement: this.shadowRoot.querySelector('audio'),
-            audioContext: this.audioContext,
-            points: ques,
-            height: 86,
-            overviewWaveformColor: '#888'
-          });
 
+        this.peaksEl.audio.onloadeddata = async () => {
+          const buffer_size = 4096;
+          if (!message.data.dataUri) {
+            this.data.dataUri = null;
+            this.peaksEl.initPeaks(this.audioContext, ques)
+          } else {
+            this.peaksEl.initPeaks(message.data.dataUri, ques)
+          }
 
           this.source = this.audioContext.createBufferSource();
           this.audioBuffer = await this.decode(message.data.arrayBuffer);
@@ -112,11 +114,8 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
           // this.gainNode.connect(this.)
           // this.gainNode.connect()
           // this.scriptProcessor.connect(this.audioContext.destination)
-          this.saveQues = this.saveQues.bind(this)
-          this.peaks.on('points.dragend', this.saveQues)
-          this.peaks.on('user_seek', this._userseek)
         }
-        this.audio.setAttribute('src', message.data.uri);
+        this.peaksEl.audio.setAttribute('src', message.data.uri);
 
         let parentNode = this.parentNode;
         while (!parentNode.host) {
@@ -124,7 +123,7 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
         }
 
         const detail = {
-          path: src,
+          path: uri,
           deck: parentNode.host.getAttribute('name')
         }
 
@@ -135,7 +134,22 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
       }
     }
 
-    this.worker.postMessage(src);
+    if (dataUri) this.worker.postMessage({uri, dataUri});
+    else this.worker.postMessage(uri);
+  }
+
+  _peaksElReady() {
+    this.save();
+  }
+
+  saveQues() {
+    if (this.peaks.ques) {
+      document.dispatchEvent(new CustomEvent('save-ques', {detail: {
+          path: this.data.path,
+          ques: this.ques
+        }
+      }))
+    }
   }
 
   play() {
@@ -145,43 +159,30 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
 
       this.source.connect(this.gainNode);
     }
-    this.peaks.player.play()
+    this.peaksEl.play()
     this.source.start(0, this.currentTime);
     this.source.playing = true;
     this.source.paused = false;
   }
 
   pause() {
-    this.peaks.player.pause()
-
-    this.currentTime = this.audioContext.currentTime
+    this.peaksEl.pause()
     this.source.stop()
+    this.currentTime = this.audioContext.currentTime
     this.source.paused = true;
   }
 
   que() {
-    this.peaks.points.add({
-      time: this.peaks.player.getCurrentTime(),
+    this.peaksEl.peaks.points.add({
+      time: this.peaksEl.peaks.player.getCurrentTime(),
       labelText: this.queLabels[this.ques.length],
       color: this.queColors[this.ques.length],
       editable: true,
       id: this.queLabels[this.ques.length]
     });
-  }
 
-  saveQues() {
-    if (this.ques) {
-      document.dispatchEvent(new CustomEvent('save-ques', {detail: {
-          path: this.data.path,
-          ques: this.ques
-        }
-      }))
-    }
-  }
-
-  // TODO: reduce writing to disk
-  beforeLoad(data) {
-    if (this.data && this.data.path !== data.path) this.saveQues()
+    this.data.ques = this.peaksEl.peaks.points.getPoints();
+    window.party.collection[this.data.path] = this.data;
   }
 
   loop({start, end}) {
@@ -204,12 +205,25 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
     return this.peaks.player.getCurrentTime()
   }
 
-  _userseek(time) {
+  _userseek({detail}) {
     this.source.stop()
-    this.currentTime = time
+    this.currentTime = detail
     // this.pause()
     this.source.paused = true
     this.play()
+  }
+
+  // TODO: reduce writing to disk
+  beforeLoad(data) {
+    if (this.data && this.data.path !== data.path) this.save();
+  }
+
+  async save() {
+    if (!this.data.dataUri) {
+      const buffer = this.peaksEl.buffer;
+      this.data.dataUri = await saveWaveform(this.data.path, buffer);
+      window.party.saveToCollection(this.data);
+    }
   }
 
   get template() {
@@ -241,37 +255,6 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
         box-sizing: border-box;
       }
 
-      .peaks-container {
-        width: 100%;
-        display: block;
-        padding: 6px;
-        box-sizing: border-box;
-      }
-      .zoom-container {
-
-        pointer-events: none;
-      }
-
-      audio {
-        position: absolute;
-        bottom: 0;
-      }
-
-      .overview-container {
-        height: 56px;
-        position: absolute;
-        bottom: 6px;
-        left: 0;
-        width: calc(100% - 12px);
-
-        padding: 0 6px;
-        box-sizing: border-box;
-      }
-
-      .flex {
-        flex: 1;
-      }
-
       scrolling-text {
         position: absolute;
         top: 0;
@@ -287,9 +270,7 @@ export default define(class PartyPlayer extends RenderMixin(HTMLElement) {
       <span class="flex"></span>
       <span class="bpm"></span>
     </span>
-    <span class="peaks-container"></span>
-    <span class="flex"></span>
-    <audio></audio>
+    <peaks-element></peaks-element>
 
     <scrolling-text text="drop song to start"></scrolling-text>
 
