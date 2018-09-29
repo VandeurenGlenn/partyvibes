@@ -27,8 +27,6 @@ export default define(class PartySettings extends RenderMixin(HTMLElement) {
 
       this.shadowRoot.querySelector('.add').addEventListener('click', this._addFolder);
       // console.log('Audio is being played on ' + audio.sinkId);
-
-      console.log(window.party.config);
     });
   }
 
