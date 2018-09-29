@@ -1,7 +1,13 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
+// listen the 'app_quit' event
 
 app.on('ready', () => {
   const mainWindow = new BrowserWindow({width: 1440, height: 900, frame: false, webPreferences: { nodeIntegrationInWorker: true }});
+
+  ipcMain.on('quit', (event, info) => {
+      app.quit()
+  })
+  
   // mainWindow.webContents.openDevTools()
 
   const hasInstance = (() => {
