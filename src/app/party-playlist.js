@@ -4,6 +4,10 @@ import './playlist-item.js';
 
 export default define(class PartyPlaylist extends RenderMixin(HTMLElement) {
 
+  get playlist() {
+    return window.party.playlist;
+  }
+
   get selector() {
     return this.shadowRoot.querySelector('custom-selector');
   }
@@ -26,8 +30,6 @@ export default define(class PartyPlaylist extends RenderMixin(HTMLElement) {
     this.selector.addEventListener('selected', this._onSelected);
     this.addEventListener('dragover', this._preventDefault);
     this.addEventListener('drop', this._onDrop);
-
-    this.playlist = [];
 
     document.addEventListener('deck-load', this._onDeckLoad)
   }
@@ -55,7 +57,8 @@ export default define(class PartyPlaylist extends RenderMixin(HTMLElement) {
 
     item.song = data;
     item.count = count;
-    this.appendChild(item)
+    this.appendChild(item);
+    document.dispatchEvent(new CustomEvent('playlist-item-added', {detail: data}))
     // this.beforeLoad(data);
     // this.data = data;
     // this.load(this.data.path, this.data.ques);
