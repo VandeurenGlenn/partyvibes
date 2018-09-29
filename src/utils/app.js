@@ -22,7 +22,7 @@ export const read = path => {
 /**
  * Spins up a worker and attempts to write file to local fs
  */
-export const write = (path, data) => {
+export const write = (path, data, absolutePath) => {
   return new Promise((resolve, reject) => {
     const worker = new Worker('workers/write.js');
 
@@ -31,6 +31,21 @@ export const write = (path, data) => {
       resolve();
     }
 
-    worker.postMessage({ path, data });
+    worker.postMessage({ path, data, absolutePath });
   });
+}
+
+/**
+ * Save waveform as .pwf (partyvibes waveform file)
+ */
+export const saveWaveform = async (path, buffer) => {
+  let absolutePath = true;
+  path = path.replace(/\.([a-z])+([0-9]?)+/, '.dat')
+  console.log(path, buffer);
+  try {
+    await write(path, new Uint8Array(buffer), absolutePath);
+    return path;
+  } catch (e) {
+    console.warn(e);
+  }
 }
