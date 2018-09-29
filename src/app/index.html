@@ -2,9 +2,7 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title></title>
-  </head>
-  <body>
+    <title>PartyVibes</title>
     <style>
       body, html {
         /* pointer-events: none; */
@@ -16,31 +14,110 @@
         right: 0;
         bottom: 0;
       }
+
+      .loading {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: #555;
+        color: #FFF;
+        font-size: 40px;
+        align-items: center;
+        justify-content: center;
+      }
     </style>
+  </head>
+  <body>
+    <span class="loading"><p>loading</p></span>
     <party-vibes></party-vibes>
     <script src="third-party/pure-knob/pureknob.js"></script>
     <script>
+      // TODO: reduce write to disk
+      // save collection after period of time
+      // enable user to disable save collection over time
+      // const { ipcRenderer } = require('electron')
+      const saveConfig = () => {
+        return write('./app/config.json', JSON.stringify(window.party.config));
+      }
 
+      const saveToCollection = song => {
+        this.collectionWorker = this.collectionWorker || new Worker('workers/collection.js');
+        this.collectionWorker.postMessage(song);
+        window.party.collection[song.path] = song
+      }
+
+
+      /**
+       * global party object including:
+       *  - configuration
+       *  - load states
+       *  - playlist
+       *  - audioContext
+       *  - globally used methodes
+       *
+       * default waveformSaveLocation saves the form in the same directory as the audioFile
+       */
       window.party = window.party || {
         audioContext: new AudioContext(),
         loaded: [],
+        playlist: [],
+        saveConfig,
+        saveToCollection,
+        collection: {},
         config: {
-          // customConfig
+          paths: [],
+          mode: 'live',
+          decks: 2,
+          tables: [
+            {name: 'a', side: 'left'},
+            {name: 'b', side: 'right'},
+            {name: 'c', side: 'left'},
+            {name: 'd', side: 'right'}
+          ],
+          queLabels: ['A', 'B', 'C', 'D'],
+          queColors: ['#E91E63', '#673AB7', '#2196F3', '#00BCD4'],
+          waveformSaveLocation: null
         }
       };
 
+      const saveCollection = async => {
+        return write('./app/collection.json', JSON.stringify(window.party.collection));
+      }
+
+      const saveCollectionAndReload = async reload => {
+        await this.saveCollection();
+        window.location.reload()
+      }
+
+      const saveCollectionAndQuit = async reload => {
+        await this.saveCollection();
+        const { ipcRenderer } = require('electron')
+        ipcRenderer.send('quit');
+      }
+
+      const keydown = ({altKey, ctrlKey, key}) => {
+        if (ctrlKey && key === 'w' || altKey && key === 'f4') saveCollectionAndQuit();
+        else if (ctrlKey && key === 'r' || key === 'f4') saveCollectionAndReload();
+      }
+      window.addEventListener('keydown', keydown);
       window.anime = require('animejs');
+
       const { read, write } = require('./utils/worker.js');
       (async () => {
         try {
-          const config = await read('./config.json');
+          const config = await read('./app/config.json');
           window.party.config = JSON.parse(config.toString())
         } catch (e) {
-          window.party.config = {
-            paths: []
-          };
-          await write('./config.json', JSON.stringify(window.party.config));
-          // return console.log('no config');
+          await saveConfig()
+        }
+        try {
+          window.party.collection = await read('./app/collection.json');
+          window.party.collection = JSON.parse(window.party.collection.toString())
+        } catch (e) {
+          await write('./app/collection.json', JSON.stringify(window.party.collection));
         }
         require('./index.js');
       })()

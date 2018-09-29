@@ -8,6 +8,14 @@ import './collection-explorer';
 import '../party-playlist.js';
 
 export default define(class PartyCollection extends RenderMixin(HTMLElement) {
+  get config() {
+    return window.party.config;
+  }
+
+  get collection() {
+    return window.party.collection;
+  }
+
   constructor() {
     super();
     this.attachShadow({mode: 'open'})
@@ -18,25 +26,8 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
   connectedCallback() {
     (async () => {
       if (super.connectedCallback) super.connectedCallback();
+      if (Object.keys(this.collection).length > 0) this.stampCollection();
 
-      // try {
-      //   this.config = await read('../../config.json');
-      //   window.party.config = this.config;
-      // } catch (e) {
-      //   this.config = {
-      //     paths: []
-      //   };
-      //   await write('../../config.json', JSON.stringify(this.config));
-      //   // return console.log('no config');
-      // }
-      this.config = window.party.config
-      try {
-        this.collection = await read('../../collection');
-        this.stampCollection()
-      } catch (e) {
-        this.collection = {};
-        await write('../../collection', JSON.stringify(this.collection));
-      }
       this.watcher = new Worker('workers/watcher.js');
       this.watcher.onmessage = message => {
         if (this.needsUpdate(message.data)) this.prepare(message.data);

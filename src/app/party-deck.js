@@ -12,12 +12,7 @@ import GainNode from './gain-node';
 export default define(class PartyDeck extends RenderMixin(HTMLElement) {
 
   get __tables__() {
-    return [
-      {name: 'a', side: 'left'},
-      {name: 'b', side: 'right'},
-      {name: 'c', side: 'left'},
-      {name: 'd', side: 'right'}
-    ]
+    return window.party.config.tables;
   }
   get a() {
     return this.shadowRoot.querySelector('party-turntable[name="a"]')
@@ -32,7 +27,7 @@ export default define(class PartyDeck extends RenderMixin(HTMLElement) {
   }
 
   get decks() {
-    return this.getAttribute('decks') || 2;
+    return this.getAttribute('decks') || window.party.config.decks || 2;
   }
 
   get leftTables() {
