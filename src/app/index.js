@@ -3,6 +3,7 @@ import RenderMixin from '../../node_modules/custom-renderer-mixin/src/render-mix
 import './../../node_modules/custom-pages/src/custom-pages.js';
 
 import './party-deck';
+import './party-studio';
 import './party-collection/party-collection';
 import './../custom-title-bar';
 
@@ -17,12 +18,18 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     this.modeButton.innerHTML = value;
     this.partyCollection.setAttribute('mode', value);
     this.partyDeck.setAttribute('mode', value);
+    this.partyLive.setAttribute('mode', value);
+    window.party.config.mode = value;
+    window.party.saveConfig()
   }
   get mode() {
-    return this._mode;
+    return window.party.config.mode;
   }
   get pages() {
     return this.shadowRoot.querySelector('custom-pages');
+  }
+  get partyLive() {
+    return this.shadowRoot.querySelector('party-studio');
   }
   get partyDeck() {
     return this.shadowRoot.querySelector('party-deck');
@@ -52,13 +59,12 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
   }
 
   _init() {
-    this.mode = 'live';
+    this.mode = this.mode || 'live';
     this.pages.selected = 'main';
     this.switchMode = this.switchMode.bind(this);
     this.switchView = this.switchView.bind(this);
     this.showSettingsButton.addEventListener('click', this.switchView);
     this.modeButton.addEventListener('click', this.switchMode);
-    console.log('ready to initialize');
   }
 
   switchMode() {
@@ -70,7 +76,6 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     if (this.pages.selected === 'settings' ) {
       this.pages.selected = 'main';
     } else {
-      console.log(window.party);
       if (!window.party.loaded['./party-settings']) import('./party-settings').then(() => window.party.loaded['./party-settings'] = true);
       this.pages.selected = 'settings';
     }
@@ -142,6 +147,20 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     justify-content: flex-end;
   }
 
+  party-studio {
+    opacity: 0;
+    pointer-events: none;
+    height: 50%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+
+  [mode="studio"] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
 </style>
 
 <custom-pages attr-for-selected="data-route">
@@ -158,6 +177,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     <main>
       <party-deck></party-deck>
       <party-collection></party-collection>
+      <party-studio></party-studio>
     </main>
   </section>
 
