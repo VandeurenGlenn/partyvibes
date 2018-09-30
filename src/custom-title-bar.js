@@ -7,10 +7,6 @@ export default define(class CustomTitleBar extends RenderMixin(HTMLElement) {
     this.attachShadow({mode: 'open'})
   }
 
-  connectedCallback() {
-    super.connectedCallback()
-  }
-
   get template() {
     return html`
 <style>
