@@ -4,10 +4,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 app.on('ready', () => {
   const mainWindow = new BrowserWindow({width: 1440, height: 900, frame: false, webPreferences: { nodeIntegrationInWorker: true }});
 
-  ipcMain.on('quit', (event, info) => {
-      app.quit()
-  })
-  
+
   // mainWindow.webContents.openDevTools()
 
   const hasInstance = (() => {
@@ -23,13 +20,23 @@ app.on('ready', () => {
   // quit app when running already
   if (hasInstance) app.quit();
 
+  ipcMain.on('quit', () => {
+      app.quit()
+  })
+
+  ipcMain.on('minimize', () => {
+      mainWindow.minimize()
+  })
+
   mainWindow.loadURL(`file://${__dirname}/index.html`)
+
+  mainWindow.webContents.openDevTools()
 
   app.on("window-all-closed", () => {
     // restore default set of windows
     // On OS X it is common for applications and their menu bar
     // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform == 'darwin') {
+    if (process.platform === 'darwin') {
       // reopen initial window
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
