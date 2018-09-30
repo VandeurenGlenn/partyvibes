@@ -1,6 +1,6 @@
 {
   "name": "partyvibes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Music mixer",
   "main": "main.js",
   "dependencies": {
