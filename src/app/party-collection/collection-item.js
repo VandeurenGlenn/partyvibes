@@ -1,6 +1,5 @@
 import define from '../../../node_modules/backed/src/utils/define';
 import RenderMixin from '../../../node_modules/custom-renderer-mixin/src/render-mixin.js';
-import { analyze } from '../../../node_modules/web-audio-beat-detector/build/es2015/module.js';
 import CustomDragMixin from '../../../node_modules/custom-drag-drop/custom-drag-mixin.js';
 
 export default define(class CollectionItem extends RenderMixin(HTMLElement) {
