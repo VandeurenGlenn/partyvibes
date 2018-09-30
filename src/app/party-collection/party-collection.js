@@ -195,6 +195,15 @@ export default define(class PartyCollection extends RenderMixin(HTMLElement) {
           width: calc(100% - var(--party-playlist-studio-width));
         }
 
+        :host([mode="studio"]) .tabs {
+          position: absolute;
+          right: 0;
+          left: auto;
+          border-right: none;
+          border-left: 1px solid #fff;
+          width: var(--party-playlist-studio-width);
+        }
+
         :host([mode="studio"]) party-playlist {
           top: 40px;
           height: calc(100% - 40px);

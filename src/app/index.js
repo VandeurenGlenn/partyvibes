@@ -7,6 +7,10 @@ import './party-studio';
 import './party-collection/party-collection';
 import './../custom-title-bar';
 
+import './party-minimize-button.js';
+import './party-quit-button.js';
+import './party-mode-button.js';
+
 window.utils = window.utils || {
   arrayBufferToString: buffer => String.fromCharCode.apply(null, new Uint8Array(buffer)),
   arrayBufferToJSON: buffer => JSON.parse(window.utils.arrayBufferToString(buffer))
@@ -15,7 +19,7 @@ window.utils = window.utils || {
 export default define(class partyVibes extends RenderMixin(HTMLElement) {
   set mode(value) {
     this._mode = value;
-    this.modeButton.innerHTML = value;
+    this.modeButton.innerHTML = value === 'live' ? 'studio' : 'live';
     this.partyCollection.setAttribute('mode', value);
     this.partyDeck.setAttribute('mode', value);
     this.partyLive.setAttribute('mode', value);
@@ -38,7 +42,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     return this.shadowRoot.querySelector('party-collection');
   }
   get modeButton() {
-    return this.shadowRoot.querySelector('.mode');
+    return this.shadowRoot.querySelector('party-mode-button');
   }
   get showSettingsButton() {
     return this.shadowRoot.querySelector('.show-settings');
@@ -56,6 +60,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
   disconnectedCallback() {
     this.showSettingsButton.removeEventListener('click', this.switchView);
     this.modeButton.removeEventListener('click', this.switchMode);
+    document.removeEventListener('back', this.switchView);
   }
 
   _init() {
@@ -63,6 +68,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     this.pages.selected = 'main';
     this.switchMode = this.switchMode.bind(this);
     this.switchView = this.switchView.bind(this);
+    document.addEventListener('back', this.switchView);
     this.showSettingsButton.addEventListener('click', this.switchView);
     this.modeButton.addEventListener('click', this.switchMode);
   }
@@ -72,12 +78,21 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     else this.mode = 'live';
   }
 
+  set selected(value) {
+    this.pages.selected = value;
+    this.setAttribute('selected', value);
+  }
+
+  get selected() {
+    return this.pages.selected
+  }
+
   switchView() {
-    if (this.pages.selected === 'settings' ) {
-      this.pages.selected = 'main';
+    if (this.selected === 'settings' ) {
+      this.selected = 'main';
     } else {
       if (!window.party.loaded['./party-settings']) import('./party-settings').then(() => window.party.loaded['./party-settings'] = true);
-      this.pages.selected = 'settings';
+      this.selected = 'settings';
     }
   }
 
@@ -96,7 +111,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     --primary-color: #bec8e9;
   }
 
-  main {
+  custom-pages {
     position: absolute;
     top: 26px;
     left: 0;
@@ -109,14 +124,6 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     display: flex;
     flex-direction: row;
     height: 100%;
-  }
-
-  .mode {
-    cursor: pointer;
-    pointer-events: auto;
-
-    border: none;
-    border-left: 1px solid #eee;
   }
 
   custom-title-bar button {
@@ -148,6 +155,7 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
   }
 
   party-studio {
+    position: absolute;
     opacity: 0;
     pointer-events: none;
     height: 50%;
@@ -161,24 +169,28 @@ export default define(class partyVibes extends RenderMixin(HTMLElement) {
     pointer-events: auto;
   }
 
+  :host([selected="settings"]) custom-pages {
+    top: 0;
+  }
+
 </style>
+<custom-title-bar>
+  <span class="button-holder" slot="left">
+    <button class="show-settings">settings</button>
+  </span>
+  <button class="autoplay" slot="middle">autoplay</button>
+  <span class="button-holder right" slot="right">
+    <party-mode-button></party-mode-button>
+    <party-minimize-button></party-minimize-button>
+    <party-quit-button></party-quit-button>
+  </span>
+</custom-title-bar>
 
 <custom-pages attr-for-selected="data-route">
   <section data-route="main">
-    <custom-title-bar>
-      <span class="button-holder" slot="left">
-        <button class="show-settings">settings</button>
-      </span>
-      <button class="autoplay" slot="middle">autoplay</button>
-      <span class="button-holder right" slot="right">
-        <button class="mode"></button>
-      </span>
-    </custom-title-bar>
-    <main>
-      <party-deck></party-deck>
-      <party-collection></party-collection>
-      <party-studio></party-studio>
-    </main>
+    <party-deck></party-deck>
+    <party-collection></party-collection>
+    <party-studio></party-studio>
   </section>
 
   <party-settings data-route="settings"></party-settings>
