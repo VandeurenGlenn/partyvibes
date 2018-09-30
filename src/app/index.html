@@ -27,6 +27,7 @@
         font-size: 40px;
         align-items: center;
         justify-content: center;
+        pointer-events: none;
       }
     </style>
   </head>
@@ -35,12 +36,13 @@
     <party-vibes></party-vibes>
     <script src="third-party/pure-knob/pureknob.js"></script>
     <script>
+      const { write, readOrCreate } = require('./utils/worker.js');
       // TODO: reduce write to disk
       // save collection after period of time
       // enable user to disable save collection over time
       // const { ipcRenderer } = require('electron')
       const saveConfig = () => {
-        return write('./app/config.json', JSON.stringify(window.party.config));
+        return write(`${process.env.APPDATA}/PartyVibes/config.json`, JSON.stringify(window.party.config));
       }
 
       const saveToCollection = song => {
@@ -84,17 +86,18 @@
       };
 
       const saveCollection = async => {
-        return write('./app/collection.json', JSON.stringify(window.party.collection));
+        return write(`${process.env.APPDATA}/PartyVibes/collection.json`, JSON.stringify(window.party.collection));
       }
 
       const saveCollectionAndReload = async reload => {
-        await this.saveCollection();
+        await saveCollection();
         window.location.reload()
       }
 
+      const { ipcRenderer } = require('electron');
+
       const saveCollectionAndQuit = async reload => {
-        await this.saveCollection();
-        const { ipcRenderer } = require('electron')
+        await saveCollection();
         ipcRenderer.send('quit');
       }
 
@@ -102,23 +105,28 @@
         if (ctrlKey && key === 'w' || altKey && key === 'f4') saveCollectionAndQuit();
         else if (ctrlKey && key === 'r' || key === 'f4') saveCollectionAndReload();
       }
+
+      const quit = async () => {
+        await saveCollectionAndQuit()
+      }
+
+      const minimize = () => {
+        ipcRenderer.send('minimize');
+      }
+
+      window.addEventListener('minimize', minimize);
+      window.addEventListener('quit', quit);
       window.addEventListener('keydown', keydown);
+
       window.anime = require('animejs');
 
-      const { read, write } = require('./utils/worker.js');
       (async () => {
-        try {
-          const config = await read('./app/config.json');
-          window.party.config = JSON.parse(config.toString())
-        } catch (e) {
-          await saveConfig()
-        }
-        try {
-          window.party.collection = await read('./app/collection.json');
-          window.party.collection = JSON.parse(window.party.collection.toString())
-        } catch (e) {
-          await write('./app/collection.json', JSON.stringify(window.party.collection));
-        }
+        const config = await readOrCreate(`${process.env.APPDATA}/PartyVibes/config.json`, JSON.stringify(window.party.config))
+        window.party.config = JSON.parse(config.toString());
+
+        const collection = await readOrCreate(`${process.env.APPDATA}/PartyVibes/collection.json`, JSON.stringify(window.party.collection))
+        window.party.collection = JSON.parse(collection.toString());
+
         require('./index.js');
       })()
       window.peaks = require('peaks.js');

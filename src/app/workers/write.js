@@ -7,8 +7,7 @@ import { bufferToArrayBuffer, write } from '../../utils/worker.js';
  */
 onmessage = async ({data}) => {
   try {
-    if (data.absolutePath) await write(data.path, data.data)
-    else await write(join(__dirname, data.path), data.data);
+    await write(data.path, data.data);
     postMessage('succes');
   } catch (error) {
     postMessage({error: error.code})

@@ -1,5 +1,4 @@
 import { parse, parseV2Tag } from 'id3-parser';
-import { join } from 'path';
 import { bufferToArrayBuffer, readOrCreate, read, write } from '../../utils/worker.js';
 
 
@@ -7,12 +6,12 @@ import { bufferToArrayBuffer, readOrCreate, read, write } from '../../utils/work
 // TODO: add preset which sets cue at first peak/frequecy (bass/kick) and last
 
 onmessage = async ({data}) => {
-  let collection = await read(join(__dirname, './../collection.json'));
+  let collection = await read(`${process.env.APPDATA}/PartyVibes/collection.json`);
   collection = JSON.parse(collection.toString());
 
   const updateCollection = (path, data) => collection[path] = data;
 
-  const writeCollection = () => write(join(__dirname, './../collection.json'), JSON.stringify(collection));
+  const writeCollection = () => write(`${process.env.APPDATA}/PartyVibes/collection.json`, JSON.stringify(collection));
 
   // check if we are dealing with a file which has been procesd already.
   if (typeof data === 'object') {

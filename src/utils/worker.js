@@ -14,14 +14,14 @@ export const write = promisify(writeFile);
 /**
  * Read file or create one when not existing
  */
-export const readOrCreate = async path => {
+export const readOrCreate = async (path, _default) => {
   try {
     const data = await read(path);
     return data;
   } catch (error) {
     if (error.code === 'ENOENT') {
-      await write(path, JSON.stringify({}));
-      return {};
+      await write(path, _default);
+      return _default;
     }
     throw error
   }
