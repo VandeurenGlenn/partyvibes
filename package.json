@@ -61,7 +61,7 @@
     "custom-selector": "^0.1.0",
     "electron": "^2.0.8",
     "electron-builder": "^20.28.2",
-    "web-audio-beat-detector": "^6.0.68"
+    "web-audio-beat-detector": "^6.0.80"
   },
   "devDependencies": {
     "rollup": "^0.63.5"
