@@ -5,9 +5,9 @@
   "main": "main.js",
   "dependencies": {
     "animejs": "^2.2.0",
-    "chokidar": "^2.0.4",
+    "chokidar": "^3.0.0",
     "id3-parser": "^2.0.0",
-    "peaks.js": "^0.9.12",
+    "peaks.js": "^0.10.0",
     "web-audio-beat-detector": "^6.0.77"
   },
   "author": "Glenn Vandeuren <vandeurenglenn@gmail.com>"
