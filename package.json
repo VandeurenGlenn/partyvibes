@@ -59,7 +59,7 @@
     "custom-renderer-mixin": "^1.1.1",
     "custom-select-mixins": "^0.11.3",
     "custom-selector": "^0.1.0",
-    "electron": "^22.1.0",
+    "electron": "^26.6.5",
     "electron-builder": "^24.1.1",
     "web-audio-beat-detector": "^6.0.68"
   },
