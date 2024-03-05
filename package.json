@@ -60,7 +60,7 @@
     "custom-select-mixins": "^0.11.3",
     "custom-selector": "^0.1.0",
     "electron": "^22.1.0",
-    "electron-builder": "^24.1.1",
+    "electron-builder": "^24.13.2",
     "web-audio-beat-detector": "^6.0.68"
   },
   "devDependencies": {
